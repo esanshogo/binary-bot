@@ -55,7 +55,7 @@
 	</script>
     <title>Binary Bot</title>
 <link href="css/bundle-9cc47670c8.css" rel="stylesheet" />    <link rel="stylesheet" href="css/binary.css">
-<link href="css/bot-c392bc3798.css" rel="stylesheet" />  </head>
+<link href="css/bot-2f017f1fc9.css" rel="stylesheet" />  </head>
 
   <body>
     <div id="tour"></div>
@@ -112,7 +112,38 @@
     <div class="rect5"></div>
 </div>
     <div id="topbar">
-      <div class="right-header show-on-load">
+        <div id="topbar-account" class="right-header" style="display: none">
+            <button id="topbar-login" data-i18n-text="Log in"></button>
+            <div id="topbar-account-list">
+                <a href="javascript:;">
+                    <ul id="topbar-main-account" class="nav-menu">
+                        <li class="account-type"></li>
+                        <li class="account-id"></li>
+                        <li class="topMenuBalance"></li>
+                        <li class="nav-caret"></li>
+                    </ul>
+                </a>
+                <ul id="all-accounts" class="nav-menu main-nav">
+                    <li class="account">
+                    <a href="javascript:;">
+                        <div class="main-account">
+                        <div class="account-type"></div>
+                        <div class="account-id"></div>
+                        <div class="topMenuBalance">&ensp;</div>
+                        </div>
+                        <div class="nav-caret"></div>
+                    </a>
+                        <ul>
+                            <div class="login-id-list"></div>
+                            <a href="javascript:;" id="topbar-btn_logout" class="logout">
+                                <li id="topbar-logout" data-i18n-text="Log out"></li>
+                            </a>
+                        </ul>
+                    </li>
+                </ul>
+            </div>
+        </div>
+        <div class="right-header show-on-load">
 <div class="languages">
   <ul id="display_language">
     <li>
@@ -143,12 +174,13 @@
   -->  
   </ul>
 </div>
-      </div>
-      <div id="server-status" class="right-header"></div>
-      <a id="contact-us" class="right-header" target="_blank" href="https://www.binary.com/en/contact.html" data-i18n-text="Contact us"></a>
-      <div id="server-time" class="right-header"></div>
+        </div>
+        <div id="server-status" class="right-header"></div>
+        <a id="contact-us" class="right-header" target="_blank" href="https://www.binary.com/en/contact.html" data-i18n-text="Contact us"></a>
+        <div id="server-time" class="right-header"></div>
     </div>
-    <div id="header">
+    
+    <div id="header" style="display: none;">
       <div class="left-header">
         <div class="logo-wrapper">
           <a href="https://www.binary.com" target="blank" id="logo">
@@ -242,5 +274,5 @@
     <audio id="job-done" src="sound/job-done.ogg" autostart="false" ></audio>
     <audio id="error" src="sound/out-of-bounds.ogg" autostart="false" ></audio>
     <audio id="severe-error" src="sound/i-am-being-serious.ogg" autostart="false" ></audio>
-<script src="js/bundle-ca910a23e2.js"></script><script src="js/bot-93263348b0.min.js"></script><script>!function(e,l,v,i,o,n){e[i]||(e[i]={}),e[i].account_id=n;var g,h;g=l.createElement(v),g.type="text/javascript",g.async=1,g.src=o+n,h=l.getElementsByTagName(v)[0],h.parentNode.insertBefore(g,h);e[i].q=[];e[i].on=function(z,y){e[i].q.push([z,y])}}(window,document,"script","_elev","https://cdn.elev.io/sdk/bootloader/v4/elevio-bootloader.js?cid=","5bbc2de0b7365");</script>  </body>
+<script src="js/bundle-ca910a23e2.js"></script><script src="js/bot.js"></script><script>!function(e,l,v,i,o,n){e[i]||(e[i]={}),e[i].account_id=n;var g,h;g=l.createElement(v),g.type="text/javascript",g.async=1,g.src=o+n,h=l.getElementsByTagName(v)[0],h.parentNode.insertBefore(g,h);e[i].q=[];e[i].on=function(z,y){e[i].q.push([z,y])}}(window,document,"script","_elev","https://cdn.elev.io/sdk/bootloader/v4/elevio-bootloader.js?cid=","5bbc2de0b7365");</script>  </body>
 </html>
