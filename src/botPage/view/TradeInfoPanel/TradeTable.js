@@ -77,6 +77,7 @@ export default class TradeTable extends Component {
             if (trade.is_expired && trade.is_sold && !trade.exit_tick) trade.exit_tick = '-';
 
             if (prevRowIndex >= 0) {
+                trade.entry_tick = rows[prevRowIndex].entry_tick || trade.entry_tick;
                 this.setState({ [accountID]: updateRow(prevRowIndex, trade, accountStat) });
             } else {
                 this.setState({ [accountID]: appendRow(trade, accountStat) });
