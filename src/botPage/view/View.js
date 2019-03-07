@@ -23,9 +23,10 @@ import { roundBalance, isVirtual } from '../common/tools';
 import {
     logoutAllTokens,
     getOAuthURL,
-    generateLiveApiInstance,
+    binaryApi,
     AppConstants,
     addTokenIfValid,
+    generateLiveApiInstance,
 } from '../../common/appId';
 import { translate } from '../../common/i18n';
 import googleDrive from '../../common/integrations/GoogleDrive';
@@ -42,13 +43,11 @@ import { isProduction } from '../../common/utils/tools';
 
 let realityCheckTimeout;
 
-const api = generateLiveApiInstance();
+new NetworkMonitor(binaryApi.api, $('#server-status')); // eslint-disable-line no-new
 
-new NetworkMonitor(api, $('#server-status')); // eslint-disable-line no-new
+binaryApi.api.send({ website_status: '1', subscribe: 1 });
 
-api.send({ website_status: '1', subscribe: 1 });
-
-api.events.on('website_status', response => {
+binaryApi.api.events.on('website_status', response => {
     $('.web-status').trigger('notify-hide');
     const { message } = response.website_status;
     if (message) {
@@ -60,7 +59,7 @@ api.events.on('website_status', response => {
     }
 });
 
-api.events.on('balance', response => {
+binaryApi.api.events.on('balance', response => {
     const {
         balance: { balance: b, currency },
     } = response;
@@ -70,14 +69,14 @@ api.events.on('balance', response => {
 });
 
 const addBalanceForToken = token => {
-    api.authorize(token).then(() => {
-        api.send({ forget_all: 'balance' }).then(() => {
-            api.subscribeToBalance();
+    binaryApi.api.authorize(token).then(() => {
+        binaryApi.api.send({ forget_all: 'balance' }).then(() => {
+            binaryApi.api.subscribeToBalance();
         });
     });
 };
 
-const chart = new Chart(api);
+const chart = new Chart(generateLiveApiInstance());
 
 const tradingView = new TradingView();
 
@@ -671,7 +670,7 @@ function initRealityCheck(stopCallback) {
     );
 }
 function renderReactComponents() {
-    ReactDOM.render(<ServerTime api={api} />, $('#server-time')[0]);
+    ReactDOM.render(<ServerTime api={binaryApi.api} />, $('#server-time')[0]);
     ReactDOM.render(<Tour />, $('#tour')[0]);
     ReactDOM.render(
         <OfficialVersionWarning
