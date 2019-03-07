@@ -156,3 +156,32 @@ export const logoutAllTokens = () =>
             }, logout);
         }
     });
+
+class BinaryApi {
+    constructor() {
+        this.api = generateLiveApiInstance();
+        this.isAuthorised = false;
+    }
+    authorisePromise() {
+        return new Promise(resolve => {
+            if (this.isAuthorised) return resolve();
+            const tokenList = getTokenList();
+            if (tokenList.length) {
+                this.api
+                    .authorize(tokenList[0].token)
+                    .then(() => {
+                        this.isAuthorised = true;
+                        return resolve();
+                    })
+                    .catch(() => {
+                        this.isAuthorised = false;
+                        logoutAllTokens();
+                        return resolve();
+                    });
+            }
+            return resolve();
+        });
+    }
+}
+
+export const binaryApi = new BinaryApi();
