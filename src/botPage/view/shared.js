@@ -4,7 +4,7 @@ import { binaryApi } from '../../common/appId';
 import _Symbol from '../common/symbolApi';
 import TicksService from '../common/TicksService';
 
-export const symbolApi = new _Symbol(binaryApi.api);
+export const symbolApi = new _Symbol(binaryApi);
 
 export const symbolPromise = new Promise(resolve => {
     symbolApi.initPromise.then(() => {
