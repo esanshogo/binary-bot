@@ -111,13 +111,12 @@ export const generateLiveApiInstance = () => new LiveApi(options);
 export const generateTestLiveApiInstance = overrideOptions => new LiveApi(Object.assign({}, options, overrideOptions));
 
 export async function addTokenIfValid(token, tokenObjectList) {
-    const api = generateLiveApiInstance();
     try {
-        const { authorize } = await api.authorize(token);
+        const { authorize } = await binaryApi.api.authorize(token);
         const { landing_company_name: lcName } = authorize;
         const {
             landing_company_details: { has_reality_check: hasRealityCheck },
-        } = await api.getLandingCompanyDetails(lcName);
+        } = await binaryApi.api.getLandingCompanyDetails(lcName);
         addToken(token, authorize, !!hasRealityCheck, ['iom', 'malta'].includes(lcName) && authorize.country === 'gb');
 
         const { account_list: accountList } = authorize;
@@ -136,23 +135,20 @@ export async function addTokenIfValid(token, tokenObjectList) {
         Elevio.logoutUser();
         throw e;
     }
-    return api.disconnect();
 }
 
 export const logoutAllTokens = () =>
     new Promise(resolve => {
-        const api = generateLiveApiInstance();
         const tokenList = getTokenList();
         const logout = () => {
             removeAllTokens();
-            api.disconnect();
             resolve();
         };
         if (tokenList.length === 0) {
             logout();
         } else {
-            api.authorize(tokenList[0].token).then(() => {
-                api.logOut().then(logout, logout);
+            binaryApi.api.authorize(tokenList[0].token).then(() => {
+                binaryApi.api.logOut().then(logout, logout);
             }, logout);
         }
     });
