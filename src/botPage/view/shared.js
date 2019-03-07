@@ -1,25 +1,21 @@
 import filesaver from 'file-saver';
 import Observer from '../../common/utils/observer';
-import { generateLiveApiInstance } from '../../common/appId';
+import { binaryApi } from '../../common/appId';
 import _Symbol from '../common/symbolApi';
 import TicksService from '../common/TicksService';
 
-let tmpApi = generateLiveApiInstance();
-
-export const symbolApi = new _Symbol(tmpApi);
+export const symbolApi = new _Symbol(binaryApi.api);
 
 export const symbolPromise = new Promise(resolve => {
     symbolApi.initPromise.then(() => {
-        tmpApi.disconnect();
-        tmpApi = null;
         resolve();
     });
 });
 
-export const ticksService = new TicksService(generateLiveApiInstance());
+export const ticksService = new TicksService(binaryApi.api);
 
 export const createScope = () => {
-    const api = generateLiveApiInstance();
+    const api = binaryApi.api; // eslint-disable-line prefer-destructuring
     const observer = new Observer();
 
     return { observer, api, ticksService, symbolApi };
