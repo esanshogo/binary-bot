@@ -1,7 +1,7 @@
 import { oppositesToDropdown } from '../utils';
 import { symbolApi } from '../../shared';
 import config from '../../../common/const';
-import { generateLiveApiInstance } from '../../../../common/appId';
+import { binaryApi } from '../../../../common/appId';
 import { translate } from '../../../../common/i18n';
 import {
     get as getStorage,
@@ -268,11 +268,10 @@ export const getContractsAvailableForSymbol = async underlyingSymbol => {
 };
 
 export const getContractsAvailableForSymbolFromApi = async underlyingSymbol => {
-    const api = generateLiveApiInstance();
     let tokenList = getTokenList();
     if (tokenList.length) {
         try {
-            await api.authorize(tokenList[0].token);
+            await binaryApi.api.authorize(tokenList[0].token);
         } catch (e) {
             removeAllTokens();
             tokenList = [];
@@ -280,7 +279,7 @@ export const getContractsAvailableForSymbolFromApi = async underlyingSymbol => {
     }
     const contractsForSymbol = {};
     try {
-        const response = await api.getContractsForSymbol(underlyingSymbol);
+        const response = await binaryApi.api.getContractsForSymbol(underlyingSymbol);
         if (response.contracts_for) {
             Object.assign(contractsForSymbol, {
                 symbol   : underlyingSymbol,
@@ -306,9 +305,6 @@ export const getContractsAvailableForSymbolFromApi = async underlyingSymbol => {
         if (window.trackJs) {
             trackJs.addMetadata('getContractsAvailableForSymbolFromApi Error', e.message);
         }
-    }
-    if (typeof api.disconnect === 'function') {
-        api.disconnect();
     }
     return contractsForSymbol;
 };
