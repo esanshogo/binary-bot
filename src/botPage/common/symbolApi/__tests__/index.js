@@ -1,15 +1,14 @@
 /* eslint-disable no-unused-expressions */
 import { expect } from 'chai';
 import _Symbol from '../index';
-import { generateLiveApiInstance } from '../../../../common/appId';
+import { binaryApi } from '../../../../common/appId';
 
 describe('symbol', () => {
-    const api = generateLiveApiInstance();
     describe('Checking functions', () => {
         let symbol;
         // eslint-disable-next-line prefer-arrow-callback
         beforeAll(function beforeAll(done) {
-            symbol = new _Symbol(api);
+            symbol = new _Symbol(binaryApi);
             symbol.initPromise.then(() => {
                 done();
             });
