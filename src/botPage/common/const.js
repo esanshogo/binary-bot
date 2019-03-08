@@ -1,5 +1,4 @@
 import { translate } from '../../common/i18n';
-import { binaryApi } from '../../common/appId';
 import { load as loadLang } from '../../common/lang';
 
 loadLang();
@@ -236,9 +235,9 @@ const config = {
     },
 };
 
-export async function updateConfigCurrencies() {
+export async function updateConfigCurrencies(api) {
     try {
-        const response = await binaryApi.api.getPayoutCurrencies();
+        const response = await api.getPayoutCurrencies();
         config.lists.CURRENCY = response.payout_currencies.map(c => [c, c]);
     } catch (e) {
         config.lists.CURRENCY = ['USD', 'EUR', 'GBP', 'AUD', ...CRYPTO_CURRENCIES].map(c => [c, c]);

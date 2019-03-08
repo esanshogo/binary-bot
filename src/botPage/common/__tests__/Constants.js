@@ -1,4 +1,5 @@
 import config, { updateConfigCurrencies } from '../const';
+import { binaryApi } from '../../../common/appId';
 
 describe('Configured currencies', () => {
     let configuration;
@@ -8,7 +9,7 @@ describe('Configured currencies', () => {
     });
 
     it('Retrieves a list of available currencies for payout', () => {
-        updateConfigCurrencies().then(() => {
+        updateConfigCurrencies(binaryApi.api).then(() => {
             expect(configuration.lists.CURRENCY).toBeDefined();
         });
     });
