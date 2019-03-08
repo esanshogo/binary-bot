@@ -1,4 +1,3 @@
-import { oppositesToDropdown } from '../utils';
 import { symbolApi } from '../../shared';
 import config from '../../../common/const';
 import { binaryApi } from '../../../../common/appId';
@@ -12,6 +11,8 @@ import {
 import { observer as globalObserver } from '../../../../common/utils/observer';
 
 let purchaseChoices = [[translate('Click to select'), '']];
+
+export const oppositesToDropdown = op => op.map(k => Object.entries(k)[0].reverse());
 
 export const getPurchaseChoices = () => purchaseChoices;
 

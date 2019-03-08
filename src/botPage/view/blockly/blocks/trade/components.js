@@ -1,6 +1,5 @@
 import { caution } from '../images';
-import { fieldGeneratorMapping } from '../shared';
-import { oppositesToDropdown } from '../../utils';
+import { fieldGeneratorMapping, oppositesToDropdown } from '../shared';
 import config from '../../../../common/const';
 import { translate } from '../../../../../common/i18n';
 

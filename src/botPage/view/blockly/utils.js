@@ -6,8 +6,6 @@ import { observer as globalObserver } from '../../../common/utils/observer';
 
 export const isMainBlock = blockType => config.mainBlocks.indexOf(blockType) >= 0;
 
-export const oppositesToDropdown = op => op.map(k => Object.entries(k)[0].reverse());
-
 export const backwardCompatibility = block => {
     if (block.getAttribute('type') === 'on_strategy') {
         block.setAttribute('type', 'before_purchase');
