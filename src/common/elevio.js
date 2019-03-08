@@ -1,11 +1,10 @@
-import { binaryApi } from './appId';
 // import { getLanguage } from '../common/lang';
 import { getTokenList } from './utils/storageManager';
 import { translate } from '../common/i18n';
 import { getLanguage } from './lang';
 
 const Elevio = (() => {
-    const init = () => {
+    const init = api => {
         if (!window._elev) return; // eslint-disable-line no-underscore-dangle
 
         // eslint-disable-next-line no-underscore-dangle
@@ -31,17 +30,17 @@ const Elevio = (() => {
             elev.setSettings({
                 page_url: `${document.location.protocol}//${document.location.hostname}${document.location.pathname}`,
             });
-            setUserInfo(elev);
+            setUserInfo(api, elev);
             setTranslations(elev);
         });
     };
 
-    const setUserInfo = elev => {
+    const setUserInfo = (api, elev) => {
         const tokenList = getTokenList();
         if (tokenList.length) {
             const activeToken = tokenList[0];
-            binaryApi.api.authorize(activeToken.token).then(() => {
-                binaryApi.api.send({ get_settings: 1 }).then(response => {
+            api.authorize(activeToken.token).then(() => {
+                api.send({ get_settings: 1 }).then(response => {
                     const isVirtual = activeToken.loginInfo.is_virtual;
                     const userObject = {
                         email     : response.get_settings.email,

@@ -5,6 +5,8 @@ import 'notifyjs-browser';
 import View from './View';
 import '../../common/binary-ui/dropdown';
 import Elevio from '../../common/elevio';
+import View from './View';
+import { binaryApi } from '../../common/appId';
 
 $.ajaxSetup({
     cache: false,
@@ -29,7 +31,7 @@ view.initPromise.then(() => {
     $('.show-on-load').show();
     $('.barspinner').hide();
     window.dispatchEvent(new Event('resize'));
-    Elevio.init();
+    Elevio.init(binaryApi.api);
     trackJs.configure({
         userId: $('.account-id')
             .first()
