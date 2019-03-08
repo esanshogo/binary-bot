@@ -3,7 +3,7 @@ import fs from 'fs';
 import readline from 'readline';
 import program from 'commander';
 import { observer as globalObserver } from '../../common/utils/observer';
-import { createInterpreter } from './CliTools';
+import Interpreter from './Interpreter';
 
 const log = (...args) => console.log(`${new Date().toLocaleTimeString()}:`, ...args); // eslint-disable-line no-console
 
@@ -27,7 +27,7 @@ const lineReader = readline.createInterface({
 
 let code = '';
 
-const interpreter = createInterpreter();
+const interpreter = new Interpreter();
 
 globalObserver.register('Error', e => log(e));
 

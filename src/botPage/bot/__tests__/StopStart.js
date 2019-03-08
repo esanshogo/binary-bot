@@ -1,12 +1,12 @@
 import { expect } from 'chai';
-import { createInterpreter } from '../CliTools';
 import { parts } from './tools';
+import Interpreter from '../Interpreter';
 
 describe('Run Interpreter over bot', () => {
     let value;
 
     beforeAll(done => {
-        let interpreter = createInterpreter();
+        let interpreter = new Interpreter();
         interpreter.run(
             `
       (function (){
@@ -18,7 +18,7 @@ describe('Run Interpreter over bot', () => {
 
         setTimeout(() => {
             interpreter.stop();
-            interpreter = createInterpreter();
+            interpreter = new Interpreter();
             interpreter
                 .run(
                     `
