@@ -80,7 +80,7 @@ const marketsWereRemoved = xml => {
     }
     return false;
 };
-const loadWorkspace = xml => {
+export const loadWorkspace = xml => {
     if (!strategyHasValidTradeTypeCategory(xml)) return;
     if (marketsWereRemoved(xml)) return;
 

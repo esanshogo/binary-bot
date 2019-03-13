@@ -80,3 +80,9 @@
         background: url("../image/expand_more.svg") no-repeat center;
     }
 }
+.icon-google-drive {
+    &:before {
+        content: ' ';
+    }
+    background: url("../image/google-drive.png") no-repeat center;
+}

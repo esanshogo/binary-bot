@@ -125,6 +125,7 @@
     <div id="toolbox" class="actions_menu show-on-load">
         <button title="Reset the blocks to their initial state" id="resetButton" class="toolbox-button icon-reset"></button>
         <button title="Load new blocks (xml file)" id="loadXml" class="toolbox-button icon-browse"></button>
+        <button title="Load blocks from Google Drive" id="loadDriveXml" class="toolbox-button icon-google-drive"></button>
         <button title="Save the existing blocks (xml file)" id="save-xml" class="toolbox-button icon-save"></button>
 
         <span class="toolbox-separator"></span>
@@ -190,6 +191,7 @@
     <audio id="severe-error" src="sound/i-am-being-serious.ogg" autostart="false"></audio>
     {{> bundle}} {{> bot}}
     {{> elevio_script }}
+    <script src="https://apis.google.com/js/api.js"></script>
 </body>
 
 </html>

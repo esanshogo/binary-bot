@@ -35,6 +35,7 @@ import {
     getToken,
 } from '../../common/utils/storageManager';
 import { isProduction } from '../../common/utils/tools';
+import GAuth from '../../common/gauth';
 
 let realityCheckTimeout;
 
@@ -258,6 +259,7 @@ const showPopup = selector =>
 export default class View {
     constructor() {
         logHandler();
+        this.gauth = new GAuth();
         this.initPromise = new Promise(resolve => {
             updateConfigCurrencies().then(() => {
                 symbolPromise.then(() => {
@@ -553,6 +555,41 @@ export default class View {
                     setTimeout(() => this.blockly.cleanUp(), 0);
                 })
                 .catch(() => {});
+        });
+
+        $('#saveToDrive').click(() => {
+            const xml = Blockly.Xml.workspaceToDom(Blockly.mainWorkspace);
+            Array.from(xml.children).forEach(blockDom => {
+                const blockId = blockDom.getAttribute('id');
+                if (!blockId) return;
+                const block = Blockly.mainWorkspace.getBlockById(blockId);
+                if ('loaderId' in block) {
+                    blockDom.remove();
+                }
+            });
+
+            this.gauth
+                .saveFileToGoogleDrive({
+                    name    : 'TestStrategy.xml',
+                    content : xml.outerHTML,
+                    mimeType: 'application/xml',
+                })
+                .then(() => {
+                    globalObserver.emit('ui.log.success', 'Successfully uploaded to Google Drive');
+                })
+                .catch(() => {
+                    globalObserver.emit('ui.log.warn', 'Could not upload to Google Drive');
+                });
+        });
+
+        $('#disconnectDrive').click(() => {
+            this.gauth.disconnect().then(() => {
+                globalObserver.emit('ui.log.success', 'Disconnected from Drive');
+            });
+        });
+
+        $('#loadDriveXml').click(() => {
+            this.gauth.createPicker();
         });
 
         $('.login-id-list').on('click', 'a', e => {
