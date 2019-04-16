@@ -208,7 +208,8 @@ export default class _Blockly {
                 const workspace = Blockly.inject('blocklyDiv', {
                     toolbox: xmlToStr(translateXml(toolboxXml.getElementsByTagName('xml')[0])),
                     zoom   : {
-                        wheel: true,
+                        wheel     : true,
+                        startScale: 0.8,
                     },
                     trashcan  : true,
                     scrollbars: true,
