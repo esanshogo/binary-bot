@@ -1,4 +1,4 @@
-import './customBlockly';
+import './customScratch';
 import blocks from './blocks';
 import {
     isMainBlock,
@@ -195,26 +195,6 @@ const overrideBlocklyDefaultShape = () => {
         }
     });
 };
-const repaintDefaultColours = () => {
-    Blockly.Msg.LOGIC_HUE = '#DEDEDE';
-    Blockly.Msg.LOOPS_HUE = '#DEDEDE';
-    Blockly.Msg.MATH_HUE = '#DEDEDE';
-    Blockly.Msg.TEXTS_HUE = '#DEDEDE';
-    Blockly.Msg.LISTS_HUE = '#DEDEDE';
-    Blockly.Msg.COLOUR_HUE = '#DEDEDE';
-    Blockly.Msg.VARIABLES_HUE = '#DEDEDE';
-    Blockly.Msg.VARIABLES_DYNAMIC_HUE = '#DEDEDE';
-    Blockly.Msg.PROCEDURES_HUE = '#DEDEDE';
-
-    Blockly.Blocks.logic.HUE = '#DEDEDE';
-    Blockly.Blocks.loops.HUE = '#DEDEDE';
-    Blockly.Blocks.math.HUE = '#DEDEDE';
-    Blockly.Blocks.texts.HUE = '#DEDEDE';
-    Blockly.Blocks.lists.HUE = '#DEDEDE';
-    Blockly.Blocks.colour.HUE = '#DEDEDE';
-    Blockly.Blocks.variables.HUE = '#DEDEDE';
-    Blockly.Blocks.procedures.HUE = '#DEDEDE';
-};
 
 export default class _Blockly {
     constructor() {
@@ -228,17 +208,17 @@ export default class _Blockly {
                 const workspace = Blockly.inject('blocklyDiv', {
                     toolbox: xmlToStr(translateXml(toolboxXml.getElementsByTagName('xml')[0])),
                     zoom   : {
-                        wheel: false,
+                        wheel: true,
                     },
-                    trashcan: false,
+                    trashcan  : true,
+                    scrollbars: true,
+                    media     : 'image/scratch/',
                 });
                 const renderInstance = render(workspace);
                 window.addEventListener('resize', renderInstance, false);
                 renderInstance();
                 addBlocklyTranslation().then(() => {
                     $.get('xml/main.xml', main => {
-                        repaintDefaultColours();
-                        overrideBlocklyDefaultShape();
                         this.blocksXmlStr = Blockly.Xml.domToPrettyText(main);
                         Blockly.Xml.domToWorkspace(main.getElementsByTagName('xml')[0], workspace);
                         this.zoomOnPlusMinus();
