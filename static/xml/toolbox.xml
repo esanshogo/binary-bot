@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <xml id="toolbox" style="display: none">
+    <category name="Variables" id="Variables" custom="VARIABLE" i18n-text="Variables" />
+    <category name="Procedures" id="Procedures" custom="PROCEDURE" i18n-text="Procedures" />
     <category name="Logic" i18n-text="Logic">
         <block type="control_if" />
         <block type="control_if_else" />
