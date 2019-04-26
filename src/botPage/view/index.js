@@ -1,11 +1,10 @@
 /* eslint-disable import/no-extraneous-dependencies */
-import 'babel-polyfill';
 import 'jquery-ui/ui/widgets/dialog';
 import 'notifyjs-browser';
+import View from './View';
 import '../../common/binary-ui/dropdown';
 import Elevio from '../../common/elevio';
-import View from './View';
-import { version } from '../../../package.json';
+import GTM from '../../common/gtm';
 
 $.ajaxSetup({
     cache: false,
@@ -31,7 +30,7 @@ view.initPromise.then(() => {
     $('.barspinner').hide();
     window.dispatchEvent(new Event('resize'));
     Elevio.init();
-    trackJs.addMetadata('version', version);
+    GTM.setVisitorId();
     trackJs.configure({
         userId: $('.account-id')
             .first()

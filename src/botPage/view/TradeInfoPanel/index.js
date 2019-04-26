@@ -4,6 +4,7 @@ import { translate } from '../../../common/i18n';
 import Summary from './Summary';
 import TradeTable from './TradeTable';
 import RunButton from './RunButton';
+import ClearButton from './ClearButton';
 
 const resetAnimation = () => {
     $('.circle-wrapper')
@@ -29,6 +30,7 @@ class AnimateTrade extends Component {
         super();
         this.indicatorMessages = {
             notRunning: translate('Bot is not running.'),
+            starting  : translate('Bot is starting...'),
             running   : translate('Bot is running...'),
             stopping  : translate('Bot is stopping...'),
             stopped   : translate('Bot has stopped.'),
@@ -39,18 +41,27 @@ class AnimateTrade extends Component {
         };
     }
     componentWillMount() {
+        globalObserver.register('bot.running', () => {
+            $('.stage-tooltip.top:eq(0)').addClass('running');
+            this.setState({ indicatorMessage: this.indicatorMessages.running });
+        });
         globalObserver.register('bot.stop', () => {
             $('.stage-tooltip.top:eq(0)').removeClass('running');
             this.setState({ indicatorMessage: this.indicatorMessages.stopped });
         });
+
         $('#stopButton').click(() => {
             $('.stage-tooltip.top:eq(0)').removeClass('running');
             this.setState({ indicatorMessage: this.state.stopMessage });
         });
+
         $('#runButton').click(() => {
             resetAnimation();
             $('.stage-tooltip.top:eq(0)').addClass('running');
-            this.setState({ indicatorMessage: this.indicatorMessages.running });
+            this.setState({
+                indicatorMessage: this.indicatorMessages.starting,
+                stopMessage     : this.indicatorMessages.stopped,
+            });
             globalObserver.register('contract.status', contractStatus => {
                 this.animateStage(contractStatus);
             });
@@ -151,7 +162,10 @@ export default class TradeInfoPanel extends Component {
             <div>
                 <div className="content">
                     <div className="content-row">
-                        <RunButton />
+                        <div className="summary-toolbox">
+                            <RunButton />
+                            <ClearButton />
+                        </div>
                     </div>
                     <div className="content-row">
                         <AnimateTrade />
@@ -162,7 +176,6 @@ export default class TradeInfoPanel extends Component {
                     <div className="content-row">
                         <Summary accountID={accountID} />
                     </div>
-
                     <div>
                         <p id="sync-warning">
                             {translate(

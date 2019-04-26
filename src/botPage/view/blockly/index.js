@@ -13,12 +13,14 @@ import {
     fixArgumentAttribute,
     removeUnavailableMarkets,
     strategyHasValidTradeTypeCategory,
+    cleanBeforeExport,
 } from './utils';
 import Interpreter from '../../bot/Interpreter';
 import createError from '../../common/error';
 import { translate, xml as translateXml } from '../../../common/i18n';
 import { getLanguage } from '../../../common/lang';
 import { observer as globalObserver } from '../../../common/utils/observer';
+import { showDialog } from '../../bot/tools';
 
 const setBeforeUnload = off => {
     if (off) {
@@ -52,16 +54,12 @@ const disposeBlocksWithLoaders = () => {
 };
 const marketsWereRemoved = xml => {
     if (!Array.from(xml.children).every(block => !removeUnavailableMarkets(block))) {
-        $('#unavailableMarkets').dialog({
-            height: 'auto',
-            width : 600,
-            modal : true,
-            open() {
-                $(this)
-                    .parent()
-                    .find('.ui-dialog-buttonset > button')
-                    .removeClass('ui-button ui-corner-all ui-widget');
-            },
+        if (window.trackJs) {
+            trackJs.track('Invalid financial market');
+        }
+        showDialog({
+            title  : translate('Warning'),
+            text   : [translate('This strategy is not available in your country.')],
             buttons: [
                 {
                     text : translate('OK'),
@@ -71,13 +69,14 @@ const marketsWereRemoved = xml => {
                     },
                 },
             ],
-        });
-        $('#unavailableMarkets').dialog('open');
+        })
+            .then(() => {})
+            .catch(() => {});
         return true;
     }
     return false;
 };
-const loadWorkspace = xml => {
+export const loadWorkspace = xml => {
     if (!strategyHasValidTradeTypeCategory(xml)) return;
     if (marketsWereRemoved(xml)) return;
 
@@ -103,7 +102,7 @@ const loadWorkspace = xml => {
     );
 };
 
-const loadBlocks = (xml, dropEvent = {}) => {
+export const loadBlocks = (xml, dropEvent = {}) => {
     if (!strategyHasValidTradeTypeCategory(xml)) return;
     if (marketsWereRemoved(xml)) return;
 
@@ -146,7 +145,7 @@ const addBlocklyTranslation = () => {
         lang = 'zh-hant';
     }
     return new Promise(resolve => {
-        $.getScript(`https://blockly-demo.appspot.com/static/msg/js/${lang}.js`, resolve);
+        $.getScript(`translations/${lang}.js`, resolve);
     });
 };
 const onresize = () => {
@@ -243,11 +242,11 @@ export default class _Blockly {
                         this.blocksXmlStr = Blockly.Xml.domToPrettyText(main);
                         Blockly.Xml.domToWorkspace(main.getElementsByTagName('xml')[0], workspace);
                         this.zoomOnPlusMinus();
-                        Blockly.mainWorkspace.clearUndo();
                         disposeBlocksWithLoaders();
                         setTimeout(() => {
                             setBeforeUnload(true);
                             Blockly.mainWorkspace.cleanUp();
+                            Blockly.mainWorkspace.clearUndo();
                         }, 0);
                         resolve();
                     });
@@ -295,7 +294,7 @@ export default class _Blockly {
         try {
             xml = Blockly.Xml.textToDom(blockStr);
         } catch (e) {
-            throw createError('FileLoad', translate('Unrecognized file format.'));
+            throw createError('FileLoad', translate('Unrecognized file format'));
         }
 
         try {
@@ -305,7 +304,7 @@ export default class _Blockly {
                 loadWorkspace(xml);
             }
         } catch (e) {
-            throw createError('FileLoad', translate('Unable to load the block file.'));
+            throw createError('FileLoad', translate('Unable to load the block file'));
         }
     }
     /* eslint-disable class-methods-use-this */
@@ -313,15 +312,10 @@ export default class _Blockly {
         const { filename, collection } = arg;
 
         setBeforeUnload(true);
+
         const xml = Blockly.Xml.workspaceToDom(Blockly.mainWorkspace);
-        Array.from(xml.children).forEach(blockDom => {
-            const blockId = blockDom.getAttribute('id');
-            if (!blockId) return;
-            const block = Blockly.mainWorkspace.getBlockById(blockId);
-            if ('loaderId' in block) {
-                blockDom.remove();
-            }
-        });
+        cleanBeforeExport(xml);
+
         save(filename, collection, xml);
     }
     run(limitations = {}) {

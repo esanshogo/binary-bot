@@ -11,6 +11,7 @@ import { parseQueryString, isProduction, getExtension } from '../common/utils/to
 import { getLanguage } from './lang';
 import AppIdMap from './appIdResolver';
 import Elevio from './elevio';
+import GTM from './gtm';
 
 export const AppConstants = Object.freeze({
     STORAGE_ACTIVE_TOKEN: 'activeToken',
@@ -71,7 +72,7 @@ const isRealAccount = () => {
     return isReal;
 };
 
-const getDomainAppId = () => AppIdMap[hostName];
+const getDomainAppId = () => AppIdMap[hostName.replace(/^www./, '')];
 
 export const getDefaultEndpoint = () => ({
     url  : isRealAccount() ? 'green.binaryws.com' : 'blue.binaryws.com',
@@ -100,10 +101,9 @@ export const getOAuthURL = () =>
     `https://${generateOAuthDomain()}/oauth2/authorize?app_id=${getAppIdFallback()}&l=${getLanguage().toUpperCase()}`;
 
 const options = {
-    apiUrl   : getWebSocketURL(),
-    websocket: typeof WebSocket === 'undefined' ? require('ws') : undefined, // eslint-disable-line global-require
-    language : getLanguage().toUpperCase(),
-    appId    : getAppIdFallback(),
+    apiUrl  : getWebSocketURL(),
+    language: getLanguage().toUpperCase(),
+    appId   : getAppIdFallback(),
 };
 
 export const generateLiveApiInstance = () => new LiveApi(options);
@@ -134,6 +134,7 @@ export async function addTokenIfValid(token, tokenObjectList) {
     } catch (e) {
         removeToken(tokenObjectList[0].token);
         Elevio.logoutUser();
+        GTM.setVisitorId();
         throw e;
     }
     return api.disconnect();

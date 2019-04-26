@@ -4,7 +4,9 @@ import 'jquery-ui/ui/widgets/dialog';
 import _Blockly from './blockly';
 import Chart from './Dialogs/Chart';
 import Limits from './Dialogs/Limits';
-import Save from './Dialogs/Save';
+import IntegrationsDialog from './Dialogs/IntegrationsDialog';
+import LoadDialog from './Dialogs/LoadDialog';
+import SaveDialog from './Dialogs/SaveDialog';
 import TradingView from './Dialogs/TradingView';
 import logHandler from './logger';
 import LogTable from './LogTable';
@@ -14,6 +16,7 @@ import OfficialVersionWarning from './react-components/OfficialVersionWarning';
 import { symbolPromise } from './shared';
 import Tour from './tour';
 import TradeInfoPanel from './TradeInfoPanel';
+import { showDialog } from '../bot/tools';
 import Elevio from '../../common/elevio';
 import { updateConfigCurrencies } from '../common/const';
 import { roundBalance, isVirtual } from '../common/tools';
@@ -25,6 +28,7 @@ import {
     addTokenIfValid,
 } from '../../common/appId';
 import { translate } from '../../common/i18n';
+import googleDrive from '../../common/integrations/GoogleDrive';
 import { getLanguage } from '../../common/lang';
 import { observer as globalObserver } from '../../common/utils/observer';
 import {
@@ -35,6 +39,7 @@ import {
     getToken,
 } from '../../common/utils/storageManager';
 import { isProduction } from '../../common/utils/tools';
+import GTM from '../../common/gtm';
 
 let realityCheckTimeout;
 
@@ -54,10 +59,6 @@ api.events.on('website_status', response => {
             className: 'warn web-status',
         });
     }
-});
-
-api.send({ time: '1' }).then(response => {
-    ReactDOM.render(<ServerTime startTime={response.time} />, $('#server-time')[0]);
 });
 
 api.events.on('balance', response => {
@@ -142,7 +143,9 @@ const clearRealityCheck = () => {
 };
 
 const limits = new Limits();
-const saveDialog = new Save();
+const integrationsDialog = new IntegrationsDialog();
+const loadDialog = new LoadDialog();
+const saveDialog = new SaveDialog();
 
 const getLandingCompanyForToken = id => {
     let landingCompany;
@@ -175,11 +178,12 @@ const getActiveToken = (tokenList, activeToken) => {
 
 const updateTokenList = () => {
     const tokenList = getTokenList();
-    const loginButton = $('#login');
-    const accountList = $('#account-list');
+    const loginButton = $('#login, #toolbox-login');
+    const accountList = $('#account-list, #toolbox-account-list');
     if (tokenList.length === 0) {
         loginButton.show();
         accountList.hide();
+
         $('.account-id')
             .removeAttr('value')
             .text('');
@@ -190,7 +194,6 @@ const updateTokenList = () => {
     } else {
         loginButton.hide();
         accountList.show();
-
         const activeToken = getActiveToken(tokenList, getStorage(AppConstants.STORAGE_ACTIVE_TOKEN));
         updateLogo(activeToken.token);
         addBalanceForToken(activeToken.token);
@@ -200,7 +203,6 @@ const updateTokenList = () => {
         }
         tokenList.forEach(tokenInfo => {
             const prefix = isVirtual(tokenInfo) ? 'Virtual Account' : `${tokenInfo.loginInfo.currency} Account`;
-
             if (tokenInfo === activeToken) {
                 $('.account-id')
                     .attr('value', `${tokenInfo.token}`)
@@ -225,41 +227,6 @@ const applyToolboxPermissions = () => {
         [fn]();
 };
 
-const showPopup = selector =>
-    new Promise((resolve, reject) => {
-        setBeforeUnload(true);
-        $(selector).dialog({
-            height: 'auto',
-            width : 600,
-            modal : true,
-            open() {
-                $(this)
-                    .parent()
-                    .find('.ui-dialog-buttonset > button')
-                    .removeClass('ui-button ui-corner-all ui-widget');
-            },
-            buttons: [
-                {
-                    text : translate('No'),
-                    class: 'button-secondary',
-                    click() {
-                        $(this).dialog('close');
-                        reject();
-                    },
-                },
-                {
-                    text : translate('Yes'),
-                    class: 'button-primary',
-                    click() {
-                        $(this).dialog('close');
-                        resolve();
-                    },
-                },
-            ],
-        });
-        $(selector).dialog('open');
-    });
-
 export default class View {
     constructor() {
         logHandler();
@@ -277,6 +244,7 @@ export default class View {
                         applyToolboxPermissions();
                         renderReactComponents();
                         if (!getTokenList().length) updateLogo();
+                        this.showHeader(getStorage('showHeader') !== 'false');
                         resolve();
                     });
                 });
@@ -362,6 +330,35 @@ export default class View {
             this.stop();
         };
 
+        const getAccountSwitchText = () => {
+            if (this.blockly.hasStarted()) {
+                return [
+                    translate(
+                        'Binary Bot will not place any new trades. Any trades already placed (but not expired) will be completed by our system. Any unsaved changes will be lost.'
+                    ),
+                    translate(
+                        'Note: Please see the Binary.com statement page for details of all confirmed transactions.'
+                    ),
+                ];
+            }
+            return [translate('Any unsaved changes will be lost.')];
+        };
+
+        const logout = () => {
+            showDialog({
+                title: translate('Are you sure?'),
+                text : getAccountSwitchText(),
+            })
+                .then(() => {
+                    this.stop();
+                    Elevio.logoutUser();
+                    googleDrive.signOut();
+                    GTM.setVisitorId();
+                    removeTokens();
+                })
+                .catch(() => {});
+        };
+
         const removeTokens = () => {
             logoutAllTokens().then(() => {
                 updateTokenList();
@@ -371,23 +368,10 @@ export default class View {
                 window.location.reload();
             });
         };
-        const logout = () => {
-            showPopup(getAccountSwitchPanelName())
-                .then(() => {
-                    this.stop();
-                    Elevio.logoutUser();
-                    removeTokens();
-                })
-                .catch(() => {});
-        };
 
         const clearActiveTokens = () => {
             setStorage(AppConstants.STORAGE_ACTIVE_TOKEN, '');
         };
-
-        const getReloadPanelName = () => (this.blockly.hasStarted() ? '#reloadPanelTrading' : '#reloadPanel');
-        const getAccountSwitchPanelName = () =>
-            this.blockly.hasStarted() ? '#switchAccountPanelTrading' : '#reloadPanel';
 
         $('.panelExitButton').click(function onClick() {
             $(this)
@@ -405,6 +389,10 @@ export default class View {
                 closeText: '',
                 classes  : { 'ui-dialog-titlebar-close': 'icon-close' },
             });
+
+        $('#integrations').click(() => integrationsDialog.open());
+
+        $('#load-xml').click(() => loadDialog.open());
 
         $('#save-xml').click(() => saveDialog.save().then(arg => this.blockly.save(arg)));
 
@@ -435,13 +423,16 @@ export default class View {
         $('#tradingViewButton').click(() => {
             tradingView.open();
         });
+
         const exportContent = {};
         exportContent.summaryPanel = () => {
             globalObserver.emit('summary.export');
         };
+
         exportContent.logPanel = () => {
             globalObserver.emit('log.export');
         };
+
         const addExportButtonToPanel = panelId => {
             const buttonHtml =
                 '<button class="icon-save" style="position:absolute;top:50%;margin:-10px 0 0 0;right:2em;padding:0.2em"></button>';
@@ -455,24 +446,22 @@ export default class View {
                 });
             }
         };
+
         const showSummary = () => {
             $('#summaryPanel').dialog('open');
             addExportButtonToPanel('summaryPanel');
         };
-        const showLog = () => {
+
+        $('#logButton').click(() => {
             $('#logPanel').dialog('open');
             addExportButtonToPanel('logPanel');
-        };
-
-        $('#logButton').click(showLog);
+        });
 
         $('#showSummary').click(showSummary);
 
-        $('#loadXml').click(() => {
-            $('#files').click();
-        });
+        $('#toggleHeaderButton').click(() => this.showHeader($('#header').is(':hidden')));
 
-        $('#logout').click(() => {
+        $('#logout, #toolbox-logout').click(() => {
             setBeforeUnload(true);
             logout();
             hideRealityCheck();
@@ -518,6 +507,7 @@ export default class View {
             $('#stopButton, #summaryStopButton').show();
             $('#runButton, #summaryRunButton').hide();
             $('#runButton, #summaryRunButton').prop('disabled', true);
+            globalObserver.emit('summary.disable_clear');
             showSummary();
             this.blockly.run(limitations);
         };
@@ -548,7 +538,23 @@ export default class View {
         });
 
         $('#resetButton').click(() => {
-            showPopup(getReloadPanelName())
+            let dialogText;
+            if (this.blockly.hasStarted()) {
+                dialogText = [
+                    translate(
+                        'Binary Bot will not place any new trades. Any trades already placed (but not expired) will be completed by our system. Any unsaved changes will be lost.'
+                    ),
+                    translate(
+                        'Note: Please see the Binary.com statement page for details of all confirmed transactions.'
+                    ),
+                ];
+            } else {
+                dialogText = [translate('Any unsaved changes will be lost.')];
+            }
+            showDialog({
+                title: translate('Are you sure?'),
+                text : dialogText,
+            })
                 .then(() => {
                     this.stop();
                     this.blockly.resetWorkspace();
@@ -558,10 +564,14 @@ export default class View {
         });
 
         $('.login-id-list').on('click', 'a', e => {
-            showPopup(getAccountSwitchPanelName())
+            showDialog({
+                title: translate('Are you sure?'),
+                text : getAccountSwitchText(),
+            })
                 .then(() => {
                     this.stop();
                     Elevio.logoutUser();
+                    GTM.setVisitorId();
                     const activeToken = $(e.currentTarget).attr('value');
                     const tokenList = getTokenList();
                     setStorage('tokenList', '');
@@ -573,7 +583,7 @@ export default class View {
                 .catch(() => {});
         });
 
-        $('#login')
+        $('#login, #toolbox-login')
             .bind('click.login', () => {
                 setBeforeUnload(true);
                 document.location = getOAuthURL();
@@ -636,6 +646,22 @@ export default class View {
             }
         });
     }
+    showHeader = show => {
+        const $header = $('#header');
+        const $topbarAccount = $('#toolbox-account');
+        const $toggleHeaderButton = $('.icon-hide-header');
+        if (show) {
+            $header.show(0);
+            $topbarAccount.hide(0);
+            $toggleHeaderButton.removeClass('enabled');
+        } else {
+            $header.hide(0);
+            $topbarAccount.show(0);
+            $toggleHeaderButton.addClass('enabled');
+        }
+        setStorage('showHeader', show);
+        window.dispatchEvent(new Event('resize'));
+    };
 }
 
 function initRealityCheck(stopCallback) {
@@ -648,6 +674,7 @@ function initRealityCheck(stopCallback) {
     );
 }
 function renderReactComponents() {
+    ReactDOM.render(<ServerTime api={api} />, $('#server-time')[0]);
     ReactDOM.render(<Tour />, $('#tour')[0]);
     ReactDOM.render(
         <OfficialVersionWarning

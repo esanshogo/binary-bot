@@ -97,7 +97,12 @@ export const strategyHasValidTradeTypeCategory = xml => {
         return false;
     });
     if (!validTradeTypeCategory) {
-        globalObserver.emit('ui.log.error', translate('The strategy you tried to import is invalid.'));
+        const errorMessage = translate('The strategy you tried to import is invalid.');
+        globalObserver.emit('ui.log.error', errorMessage);
+
+        if (window.trackJs) {
+            trackJs.track(errorMessage);
+        }
     }
     return validTradeTypeCategory;
 };
@@ -484,3 +489,20 @@ export const loadRemote = blockObj =>
             }
         }
     });
+
+export const hideInteractionsFromBlockly = callback => {
+    Blockly.Events.recordUndo = false;
+    callback();
+    Blockly.Events.recordUndo = true;
+};
+
+export const cleanBeforeExport = xml => {
+    Array.from(xml.children).forEach(blockDom => {
+        const blockId = blockDom.getAttribute('id');
+        if (!blockId) return;
+        const block = Blockly.mainWorkspace.getBlockById(blockId);
+        if ('loaderId' in block) {
+            blockDom.remove();
+        }
+    });
+};
