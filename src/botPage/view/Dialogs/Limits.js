@@ -1,4 +1,4 @@
-import { LiveApi } from 'binary-live-api';
+import { LiveApi } from 'aaron-live-api';
 import React, { PureComponent } from 'react';
 import PropTypes from 'prop-types';
 import Dialog from './Dialog';

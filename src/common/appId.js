@@ -1,4 +1,4 @@
-import { LiveApi } from 'binary-live-api';
+import { LiveApi } from 'aaron-live-api';
 import {
     addToken,
     removeToken,
@@ -101,9 +101,11 @@ export const getOAuthURL = () =>
     `https://${generateOAuthDomain()}/oauth2/authorize?app_id=${getAppIdFallback()}&l=${getLanguage().toUpperCase()}`;
 
 const options = {
-    apiUrl  : getWebSocketURL(),
-    language: getLanguage().toUpperCase(),
-    appId   : getAppIdFallback(),
+    apiUrl     : getWebSocketURL(),
+    language   : getLanguage().toUpperCase(),
+    appId      : getAppIdFallback(),
+    sendSpy    : test => console.log('Request', test),
+    responseSpy: test => console.log('Response', test),
 };
 
 export const generateLiveApiInstance = () => new LiveApi(options);

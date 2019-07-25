@@ -47,7 +47,7 @@
     "babel-eslint": "^10.0.1",
     "babel-jest": "^24.8.0",
     "babel-loader": "^8.0.6",
-    "binary-live-api": "^29.0.0",
+    "aaron-live-api": "^29.0.0",
     "binary-utils": "^4.23.0",
     "chai": "^4.1.2",
     "coveralls": "^3.0.3",
